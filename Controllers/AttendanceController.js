@@ -90,13 +90,13 @@ exports.getTotalDurationWeek = async (req, res) => {
     const userId = req.query.userid || req.user._id;
     const { startDate, endDate } = req.query;
 
-    // Define the date range using query parameters or defaulting to the week
+    // Define the date range using query parameters or defaulting to the current ISO week (Monday to Sunday)
     const startOfRange = startDate
       ? moment(startDate).startOf("day")
-      : moment().startOf("week");
+      : moment().startOf("isoWeek"); // Start of the current ISO week (Monday)
     const endOfRange = endDate
       ? moment(endDate).endOf("day")
-      : moment().endOf("week");
+      : moment().endOf("isoWeek"); // End of the current ISO week (Sunday)
 
     // Retrieve attendance records within the date range
     const attendances = await Attendance.find({
@@ -116,6 +116,7 @@ exports.getTotalDurationWeek = async (req, res) => {
     // Calculate the duration for sessions within the date range
     const filteredAttendances = attendances.map(({ createdAt, sessions }) => {
       const filteredSessions = sessions.filter(({ checkIn, checkOut }) => {
+        // Ensure checkIn or checkOut fall within the specified range
         const inRange = (date) =>
           moment(date).isBetween(startOfRange, endOfRange, null, "[]");
         return inRange(checkIn) || (checkOut && inRange(checkOut));
@@ -132,7 +133,7 @@ exports.getTotalDurationWeek = async (req, res) => {
 
       return {
         date: moment(createdAt).format("YYYY-MM-DD"),
-        totalDuration: formatDuration(totalDuration),
+        totalDuration: totalDuration > 0 ? formatDuration(totalDuration) : null,
         sessions: filteredSessions.map(({ checkIn, checkOut }) => ({
           checkIn: moment(checkIn).format("YYYY-MM-DD HH:mm:ss"),
           checkOut: checkOut
@@ -154,6 +155,7 @@ exports.getTotalDurationWeek = async (req, res) => {
     res.status(500).json({ message: "Error retrieving total duration", error });
   }
 };
+
 
 exports.addHoliday = async (req, res) => {
   try {
@@ -223,24 +225,12 @@ exports.getWeekSummaryWithWeekends = async (req, res) => {
         record.sessions.some((session) => moment(session.checkIn).isSame(day, "day"))
       );
 
-      // Calculate total duration for the day
-      const totalDuration = attendance
-        ? attendance.sessions
-            .filter((session) => moment(session.checkIn).isSame(day, "day"))
-            .reduce((duration, { checkIn, checkOut }) => {
-              return checkOut
-                ? duration + moment(checkOut).diff(moment(checkIn))
-                : duration;
-            }, 0)
-        : 0;
-
       return {
         date,
         isHoliday,
         isWeekend,
         isAbsent: !isHoliday && !isWeekend && !attendance, // Mark as absent only if not holiday/weekend
         attendance: !!attendance,
-        totalDuration: totalDuration > 0 ? formatDuration(totalDuration) : null,
       };
     });
 
@@ -257,3 +247,4 @@ exports.getWeekSummaryWithWeekends = async (req, res) => {
     res.status(500).json({ message: "Error fetching week summary", error });
   }
 };
+
