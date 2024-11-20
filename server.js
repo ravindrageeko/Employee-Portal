@@ -26,6 +26,7 @@ app.use('/Employee', require('./Routes/Employee.routes'));
 app.use('/Employee', require('./Routes/Attrition.routes'));
 app.use('/Employee', require('./Routes/Attendance.routes'));
 app.use('/Employee', require('./Routes/checkOutDetails.routes'));
+app.use('/Employee', require('./Routes/sessionChange.routes'));
 
 app.get("/", async (req, res) => {
   res.send("Welcome")

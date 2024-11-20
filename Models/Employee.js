@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
 
 // Schema for Work Experience
 const WorkExperienceSchema = new mongoose.Schema({

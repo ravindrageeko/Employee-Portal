@@ -16,6 +16,12 @@ const AttendanceSchema = new mongoose.Schema({
     type: Number, // Duration in milliseconds
     default: 0,
   },
+  history: [
+    {
+      sessions: { type: Array },
+      updatedAt: { type: Date, default: Date.now },
+    },
+  ],
 }, {
   timestamps: true,
 });
