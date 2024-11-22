@@ -156,7 +156,6 @@ exports.getTotalDurationWeek = async (req, res) => {
   }
 };
 
-
 exports.addHoliday = async (req, res) => {
   try {
     const { date, name } = req.body;
@@ -176,6 +175,20 @@ exports.addHoliday = async (req, res) => {
   }
 };
 
+exports.getHoliday = async (req, res) => {
+  try {
+    const holidays = await Holiday.find();
+    if (holidays.length === 0) {
+      res.status(200).json({ message: "No holidays found" });
+    }
+    return res
+      .status(200)
+      .json({ message: "Holidays retrived successfully", holidays });
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving holiday", error });
+  }
+};
+
 exports.getWeekSummaryWithWeekends = async (req, res) => {
   try {
     const userId = req.query.userId || req.user._id; // User ID from query or authenticated user
@@ -191,7 +204,11 @@ exports.getWeekSummaryWithWeekends = async (req, res) => {
 
     // Create an array of all days in the range
     const daysInWeek = [];
-    for (let day = startOfWeek.clone(); day.isSameOrBefore(endOfWeek); day.add(1, "day")) {
+    for (
+      let day = startOfWeek.clone();
+      day.isSameOrBefore(endOfWeek);
+      day.add(1, "day")
+    ) {
       daysInWeek.push(day.clone());
     }
 
@@ -222,7 +239,9 @@ exports.getWeekSummaryWithWeekends = async (req, res) => {
 
       // Find attendance for the specific day
       const attendance = attendances.find((record) =>
-        record.sessions.some((session) => moment(session.checkIn).isSame(day, "day"))
+        record.sessions.some((session) =>
+          moment(session.checkIn).isSame(day, "day")
+        )
       );
 
       return {
@@ -247,4 +266,3 @@ exports.getWeekSummaryWithWeekends = async (req, res) => {
     res.status(500).json({ message: "Error fetching week summary", error });
   }
 };
-

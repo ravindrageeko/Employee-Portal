@@ -9,13 +9,13 @@ exports.requestChange = async (req, res) => {
     if (!date) {
       return res.status(400).json({ message: "Date is required" });
     }
+
     if (!checkIn && !checkOut) {
       return res
         .status(400)
         .json({ message: "Either checkIn or checkOut time must be provided" });
     }
 
-    // Find attendance for the user
     const attendance = await Attendance.findOne({
       userId,
       createdAt: {
@@ -30,28 +30,36 @@ exports.requestChange = async (req, res) => {
         .json({ message: "No attendance record found for the specified date" });
     }
 
-    // Parse checkIn and checkOut times
-    const parsedCheckIn = checkIn
-      ? new Date(`${date}T${checkIn}`)
-      : undefined;
-    const parsedCheckOut = checkOut
-      ? new Date(`${date}T${checkOut}`)
-      : undefined;
+    const updateData = {};
 
-    // Create the change request
+    // Parse checkIn and checkOut times only if provided
+    if (checkIn) {
+      updateData.checkIn = new Date(`${date}T${checkIn}`);
+    }
+
+    if (checkOut) {
+      updateData.checkOut = new Date(`${date}T${checkOut}`);
+    }
+
+    // Update the attendance record
+    await Attendance.updateOne(
+      { _id: attendance._id },
+      { $set: updateData }
+    );
+
+    // Create the change request (note: only the provided times will be recorded)
     const changeRequest = await ChangeRequest.create({
       userId,
       date,
-      requestedChanges: { checkIn: parsedCheckIn, checkOut: parsedCheckOut },
+      requestedChanges: updateData,
     });
 
-    res
-      .status(201)
-      .json({ message: "Change request submitted", changeRequest });
+    res.status(201).json({ message: "Change request submitted", changeRequest });
   } catch (error) {
     res.status(500).json({ message: "Error submitting change request", error });
   }
 };
+
 
 
 exports.approveChange = async (req, res) => {
