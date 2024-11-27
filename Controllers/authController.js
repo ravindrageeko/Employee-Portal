@@ -11,69 +11,69 @@ const hashPassword = async (password) => {
 };
 
 // Register user
-exports.register = async (req, res) => {
-  const { first_name, last_name, email, user_role, password } = req.body;
-  if (!email || !password || !first_name || !last_name || !user_role) {
-    return res
-      .status(400)
-      .json(responseHandler(0, 400, "All fields are required"));
-  }
+// exports.register = async (req, res) => {
+//   const { first_name, last_name, email, user_role, password } = req.body;
+//   if (!email || !password || !first_name || !last_name || !user_role) {
+//     return res
+//       .status(400)
+//       .json(responseHandler(0, 400, "All fields are required"));
+//   }
 
-  try {
-    res.setHeader('Content-Type', 'application/json');
-    if (await User.findOne({ email })) {
-      return res.json(responseHandler(0, 400, "User with this email already exists"));
-    }
+//   try {
+//     res.setHeader('Content-Type', 'application/json');
+//     if (await User.findOne({ email })) {
+//       return res.json(responseHandler(0, 400, "User with this email already exists"));
+//     }
 
-    const hashedPassword = await hashPassword(password);
-    const user = await User.create({
-      first_name,
-      last_name,
-      email,
-      user_role,
-      password: hashedPassword,
-    });
+//     const hashedPassword = await hashPassword(password);
+//     const user = await User.create({
+//       first_name,
+//       last_name,
+//       email,
+//       user_role,
+//       password: hashedPassword,
+//     });
 
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "4h",
-    });
+//     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+//       expiresIn: "4h",
+//     });
 
-    return res.json(
-      responseHandler(1, 200, "User registered successfully", { token, user })
-    );
-  } catch (error) {
-    return res.json(responseHandler(0, 500, "Error creating user", error.message));
-  }
-};
+//     return res.json(
+//       responseHandler(1, 200, "User registered successfully", { token, user })
+//     );
+//   } catch (error) {
+//     return res.json(responseHandler(0, 500, "Error creating user", error.message));
+//   }
+// };
 
 // Update user
-exports.updateUser = async (req, res) => {
-  const { id } = req.params;
-  const { first_name, last_name, email, user_role, password } = req.body;
+// exports.updateUser = async (req, res) => {
+//   const { id } = req.params;
+//   const { first_name, last_name, email, user_role, password } = req.body;
 
-  try {
-    res.setHeader('Content-Type', 'application/json');
-    const user = await User.findById(id);
-    if (!user)
-      return res.status(404).json(responseHandler(0, 404, "User not found"));
+//   try {
+//     res.setHeader('Content-Type', 'application/json');
+//     const user = await User.findById(id);
+//     if (!user)
+//       return res.status(404).json(responseHandler(0, 404, "User not found"));
 
-    user.first_name = first_name || user.first_name;
-    user.last_name = last_name || user.last_name;
-    user.email = email || user.email;
-    user.user_role = user_role || user.user_role;
+//     user.first_name = first_name || user.first_name;
+//     user.last_name = last_name || user.last_name;
+//     user.email = email || user.email;
+//     user.user_role = user_role || user.user_role;
 
-    if (password) {
-      user.password = await hashPassword(password);
-    }
+//     if (password) {
+//       user.password = await hashPassword(password);
+//     }
 
-    await user.save();
-    return res.json(responseHandler(1, 200, "User updated successfully", user));
-  } catch (error) {
-    return res
-      .status(500)
-      .json(responseHandler(0, 500, "Error updating user", error.message));
-  }
-};
+//     await user.save();
+//     return res.json(responseHandler(1, 200, "User updated successfully", user));
+//   } catch (error) {
+//     return res
+//       .status(500)
+//       .json(responseHandler(0, 500, "Error updating user", error.message));
+//   }
+// };
 
 // Get all users
 exports.getAllUsers = async (req, res) => {
@@ -116,23 +116,23 @@ exports.getUserById = async (req, res) => {
 };
 
 // Delete user by ID
-exports.deleteUserById = async (req, res) => {
-  const { id } = req.params;
-  try {
-    res.setHeader('Content-Type', 'application/json');
-    const deletedUser = await User.findByIdAndDelete(id);
-    if (!deletedUser)
-      return res.status(404).json(responseHandler(0, 404, "User not found"));
+// exports.deleteUserById = async (req, res) => {
+//   const { id } = req.params;
+//   try {
+//     res.setHeader('Content-Type', 'application/json');
+//     const deletedUser = await User.findByIdAndDelete(id);
+//     if (!deletedUser)
+//       return res.status(404).json(responseHandler(0, 404, "User not found"));
 
-    return res
-      .status(200)
-      .json(responseHandler(1, 200, "User deleted successfully", deletedUser));
-  } catch (error) {
-    return res
-      .status(500)
-      .json(responseHandler(0, 500, "Error deleting user", error.message));
-  }
-};
+//     return res
+//       .status(200)
+//       .json(responseHandler(1, 200, "User deleted successfully", deletedUser));
+//   } catch (error) {
+//     return res
+//       .status(500)
+//       .json(responseHandler(0, 500, "Error deleting user", error.message));
+//   }
+// };
 
 // User login
 exports.login = async (req, res) => {

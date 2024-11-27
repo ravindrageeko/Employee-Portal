@@ -126,6 +126,9 @@ const EmployeeProfileSchema = new mongoose.Schema({
         default:"employee",
         enum: ['manager', 'admin', 'employee'],
     },
+    ESSL_id: { 
+        type: Number, 
+    },
 });
 
 // Pre-save hook to generate and hash a password before saving
